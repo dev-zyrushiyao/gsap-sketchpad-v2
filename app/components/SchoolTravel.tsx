@@ -6,15 +6,28 @@ import React, { useRef, useState } from "react";
 gsap.registerPlugin(useGSAP, MotionPathPlugin);
 
 export default function SchoolTravel() {
+  //useRef
   const container = useRef<HTMLDivElement | null>(null);
   const charTween = useRef<gsap.core.Tween | null>(null);
 
-  //state
+  //toggle state (animation toggle and button label)
   const [isPaused, setIsPaused] = useState<boolean>(true);
   const [isComplete, setIsComplete] = useState<boolean>(false);
 
+  //slider state (input timer and duration)
+  const [sliderVal, setSliderVal] = useState<number>(0);
+  const [maxDuration, setMaxDuration] = useState<number>(0);
+
   const { contextSafe } = useGSAP(
     () => {
+      function updateTween(): void {
+        //update the value of slider when the animation plays
+        const animationTime = charTween.current?.time().toFixed(2);
+        if (!animationTime) return;
+
+        setSliderVal(Number(animationTime));
+      }
+
       //FUOC
       gsap.set(container.current, { opacity: 1 });
 
@@ -26,16 +39,31 @@ export default function SchoolTravel() {
           //set the state to true to reflect on button text
           setIsComplete(true);
         },
-
+        onUpdate: () => {
+          updateTween();
+        },
         motionPath: {
           path: "#road-way",
           align: "#road-way",
           alignOrigin: [0.5, 0.5],
         },
       });
+
+      //set up the max duration of slider according to the tween animation
+      if (!charTween.current) return;
+      setMaxDuration(charTween.current?.duration());
     },
     { scope: container },
   );
+
+  function handleOnChangeSlider(
+    e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>,
+  ): void {
+    const time = charTween.current?.time(Number(e.target.value)).pause();
+    time?.pause();
+
+    setIsPaused(true);
+  }
 
   function handleClick() {
     const toggle = contextSafe(() => {
@@ -49,7 +77,9 @@ export default function SchoolTravel() {
       //if the animation is complete and clicked the button again set the complete and paused state to false
       //restart the animation and leave the function (ignores the paused toggle)
       //if pressed again after it will trigger the first instance again
-      if (isComplete) {
+      //you can use the isComplete state as conditional but to be safe I use the current progress
+      const tweenProgress: number = charTween.current.progress();
+      if (tweenProgress === 1) {
         setIsComplete(false);
         setIsPaused(false);
         console.log("to restart");
@@ -229,14 +259,36 @@ export default function SchoolTravel() {
         </defs>
       </svg>
       <div className="bg-gray-400 h-25 w-full">
-        <button
-          id="play-btn"
-          className="border-2 rounded-2xl p-5 bg-yellow-300 w-30"
-          onClick={handleClick}
-        >
-          {/* {isPaused ? "Play" : "Pause"} */}
-          {isComplete ? "Restart" : isPaused ? "Play" : "Pause"}
-        </button>
+        <div className="flex flex-row gap-5 justify-center">
+          <button
+            id="play-btn"
+            className="border-2 rounded-2xl p-5 bg-yellow-300 w-30"
+            onClick={handleClick}
+          >
+            {/* {isPaused ? "Play" : "Pause"} */}
+            {isComplete ? "Restart" : isPaused ? "Play" : "Pause"}
+          </button>
+          <div className="bg-amber-300 flex flex-row items-center gap-5 w-100">
+            <input
+              type="range"
+              min="0"
+              max={maxDuration}
+              value={sliderVal}
+              step={0.001}
+              className="slider w-full"
+              id="myRange"
+              onChange={(e) => {
+                //adjust the time of tween using e value then set the state to pause
+                handleOnChangeSlider(e);
+              }}
+            />
+            <div className="bg-red-200 w-40">
+              <p className="time-indicator text-2xl font-bold text-center">
+                {sliderVal}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
