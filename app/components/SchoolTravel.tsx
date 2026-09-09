@@ -10,16 +10,23 @@ export default function SchoolTravel() {
   const container = useRef<HTMLDivElement | null>(null);
   const charTween = useRef<gsap.core.Tween | null>(null);
 
-  //toggle state (animation toggle and button label)
+  //toggle state (animation toggle and button disable and label)
   const [isPaused, setIsPaused] = useState<boolean>(true);
   const [isComplete, setIsComplete] = useState<boolean>(false);
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
 
   //slider state (input timer and duration)
   const [sliderVal, setSliderVal] = useState<number>(0);
   const [maxDuration, setMaxDuration] = useState<number>(0);
 
+  //image values to be referenced in the image/rect attribute to be triggered as tween progress when clicked
+  const dataValueHouse: string = "0";
+  const dataValueRestau: string = "0.3";
+  const dataValueSchool: string = "1";
+
   const { contextSafe } = useGSAP(
     () => {
+      //function init
       function updateTween(): void {
         //update the value of slider when the animation plays
         const animationTime = charTween.current?.time().toFixed(2);
@@ -59,10 +66,38 @@ export default function SchoolTravel() {
   function handleOnChangeSlider(
     e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>,
   ): void {
-    const time = charTween.current?.time(Number(e.target.value)).pause();
+    const time = charTween.current?.time(Number(e.target.value));
     time?.pause();
 
     setIsPaused(true);
+  }
+
+  function handleClickImage(
+    e: React.MouseEvent<SVGGElement, MouseEvent>,
+  ): void {
+    const imageClickAnimation = contextSafe(() => {
+      //tween the animation progressing using the custom data-* attribute of the image/rect
+      const tImageVal = e.currentTarget.getAttribute("data-value");
+      //guard clause
+      if (!charTween.current) return;
+
+      //progress tween
+      charTween.current.pause();
+      setIsComplete(false);
+      setIsDisabled(true);
+      gsap.to(charTween.current, {
+        progress: tImageVal,
+        duration: 0.5,
+        ease: "power1.inOut",
+        onComplete: () => {
+          setIsPaused(true);
+          //prevents user from interrupting character travel (click image)
+          setIsDisabled(false);
+        },
+      });
+    });
+
+    imageClickAnimation();
   }
 
   function handleClick() {
@@ -76,8 +111,8 @@ export default function SchoolTravel() {
       //Executes after the first instance finish
       //if the animation is complete and clicked the button again set the complete and paused state to false
       //restart the animation and leave the function (ignores the paused toggle)
-      //if pressed again after it will trigger the first instance again
-      //you can use the isComplete state as conditional but to be safe I use the current progress
+      //if pressed again while animating it will trigger the first instance condition again
+      //you can use the isComplete state as conditional but to be safe I use the current progress to track it realtime
       const tweenProgress: number = charTween.current.progress();
       if (tweenProgress === 1) {
         setIsComplete(false);
@@ -93,9 +128,11 @@ export default function SchoolTravel() {
       setIsPaused(!isCurrentlyPaused);
 
       console.log(
-        `snapshot state: paused: ${isPaused} , complete: ${isComplete}`,
+        `previous state: paused: ${isPaused} , complete: ${isComplete}`,
       );
     });
+
+    console.log(charTween.current?.targets()[0]);
 
     //execute the toggle - contextSafe
     toggle();
@@ -136,6 +173,10 @@ export default function SchoolTravel() {
             width={67}
             height={43}
             fill="url(#pattern0_3701_9879)"
+            data-value={dataValueHouse}
+            onClick={(e) => {
+              handleClickImage(e);
+            }}
           />
           <path
             id="Home"
@@ -151,6 +192,10 @@ export default function SchoolTravel() {
             width={51}
             height={29}
             fill="url(#pattern1_3701_9879)"
+            data-value={dataValueRestau}
+            onClick={(e) => {
+              handleClickImage(e);
+            }}
           />
           <path
             id="Fast food"
@@ -166,6 +211,10 @@ export default function SchoolTravel() {
             width={48}
             height={48}
             fill="url(#pattern2_3701_9879)"
+            data-value={dataValueSchool}
+            onClick={(e) => {
+              handleClickImage(e);
+            }}
           />
           <path
             id="School"
@@ -262,27 +311,29 @@ export default function SchoolTravel() {
         <div className="flex flex-row gap-5 justify-center">
           <button
             id="play-btn"
-            className="border-2 rounded-2xl p-5 bg-yellow-300 w-30"
+            className={`border-2 rounded-2xl p-5  ${isDisabled ? "bg-gray-200" : "bg-yellow-300"} ${isDisabled ? "text-gray-400" : "text-black"}  w-30`}
+            disabled={isDisabled}
             onClick={handleClick}
           >
             {/* {isPaused ? "Play" : "Pause"} */}
             {isComplete ? "Restart" : isPaused ? "Play" : "Pause"}
           </button>
-          <div className="bg-amber-300 flex flex-row items-center gap-5 w-100">
+          <div className=" flex flex-row items-center gap-5 w-100">
             <input
+              id="myRange"
+              className="slider w-full"
               type="range"
               min="0"
               max={maxDuration}
               value={sliderVal}
               step={0.001}
-              className="slider w-full"
-              id="myRange"
+              disabled={isDisabled}
               onChange={(e) => {
                 //adjust the time of tween using e value then set the state to pause
                 handleOnChangeSlider(e);
               }}
             />
-            <div className="bg-red-200 w-40">
+            <div className="w-40">
               <p className="time-indicator text-2xl font-bold text-center">
                 {sliderVal}
               </p>
