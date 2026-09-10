@@ -28,37 +28,49 @@ export default function TimelineVisualizer() {
         },
       });
       animationTl.current
-        .to("#shape-star", { x: 950, duration: 1 })
-        .to("#shape-ellipse", { x: 950, duration: 1 })
-        .to("#shape-box", { x: 950, duration: 1 });
+        .to(".shape-star", { x: 950, duration: 4 }, 0)
+        .to(".shape-ellipse", { x: 950, duration: 2 }, 1)
+        .to(".shape-box", { x: 950, duration: 1 }, "<-=0.3");
 
-      //item Children
-      const childArrId: string[] = [];
-      const itemChildren = document.querySelectorAll("#items > *");
-      itemChildren.forEach((child) => {
-        const targetId = child.getAttribute("id");
-        //add the id to the children
-        if (targetId) {
-          childArrId.push(targetId);
-        }
-      });
+      // const chil = animationTl.current.getChildren();
+      // chil.forEach((tween, index) => {
+      //   console.log(`[Index ${index}] Target:`, tween.targets()[0]);
+      //   console.log(`  ├─ Start Time: ${tween.startTime()}s`);
+      //   console.log(`  ├─ Duration:   ${tween.duration()}s`);
+      //   console.log(`  └─ End Time:    ${tween.endTime()}s`);
+      // });
 
-      //animation children
+      // Animation children
+      // The reason you have to get the class from the timeline itself is because of the ordering execution sequence from timeline vary from its time start
+      // if you get the children from the #items (group) it is a static array
+      // using it as a selector to tween with dynamic squence order of timeline statTime values will cause a mismatch to the static array
+      // for example:
+      // get the children from the group : items > [shape-star , shape-ellipse ,shape-box]
+      // timeline execution order sequence: timeline > [shape-ellipse , shape-box - shape-star]
+      // tween/set the width and timelocation = items[index] != timeline[index]
+      // you need to get the classname directly to the timeline in order to get the proper sequence and apply a parallel attribute value to the element we need to target (ui-timeline) to reference them properly on the selector
+      // tween animation className: shape-star then UI TIMELINE should be id: shape-star
+
       const animChildren = animationTl.current.getChildren();
+      const childClassArr: string[] = animChildren
+        .flatMap((child) => child.targets())
+        .map((targetElem: HTMLElement) => targetElem.getAttribute("class"))
+        .filter((elemClassName): elemClassName is string =>
+          Boolean(elemClassName),
+        );
 
       //reference the childArrId as selector and use animChildren[i] for values
       for (let i = 0; i < animChildren.length; i++) {
-        //set the time location of the box in the UI
-        gsap.set("#" + childArrId[i], {
+        //set the time location of the group (box) in the UI
+        gsap.set("#" + childClassArr[i], {
           x: animChildren[i].startTime() * pixelPerSecond,
         });
 
         //set the length of the width according to the animation duration
-        gsap.set(`#${childArrId[i]} > rect`, {
+        //#shapes-* is a group that contains rect , icon and a text
+        gsap.set("#" + childClassArr[i] + "> *", {
           width: animChildren[i].duration() * pixelPerSecond,
         });
-
-        console.log(childArrId[i]);
       }
 
       //drag scrub
@@ -102,13 +114,17 @@ export default function TimelineVisualizer() {
       const targetTime = Math.max(0, animationTl.current.time() - 0.5);
       //animation behavior
       const currentProgress = targetTime / duration;
-      animationTl.current.pause();
+      const childrenLength = animationTl.current.getChildren().length;
+      console.log(childrenLength);
 
       //tween the rewind
       gsap.to(animationTl.current, {
         progress: currentProgress,
-        duration: 0.5,
+        duration: duration / childrenLength,
       });
+
+      //mimic the pause
+      gsap.to(animationTl.current, { timeScale: 0, duration: 1 });
     });
 
     context();
@@ -119,11 +135,11 @@ export default function TimelineVisualizer() {
       if (!animationTl.current) return;
 
       const currentTimeScale = animationTl.current?.timeScale();
-      if (currentTimeScale === 0) {
+      if (currentTimeScale >= 0) {
         gsap.to(animationTl.current, { timeScale: 1, duration: 0.3 });
       }
 
-      animationTl.current.play();
+      animationTl.current.timeScale(1);
     });
 
     context();
@@ -158,19 +174,19 @@ export default function TimelineVisualizer() {
           <rect width={1060} height={505} fill="#282828" />
           <g id="tween-g">
             <path
-              id="shape-star"
+              className="shape-star"
               d="M65.5 11L71.1129 28.2746H89.2764L74.5818 38.9508L80.1946 56.2254L65.5 45.5491L50.8054 56.2254L56.4182 38.9508L41.7236 28.2746H59.8871L65.5 11Z"
               fill="#DB7272"
             />
             <circle
-              id="shape-ellipse"
+              className="shape-ellipse"
               cx={65.5}
               cy={104}
               r={25}
               fill="#576BEB"
             />
             <rect
-              id="shape-box"
+              className="shape-box"
               x={40.5}
               y={147}
               width={50}
@@ -186,7 +202,7 @@ export default function TimelineVisualizer() {
             fill="#747474"
           />
           <g id="items">
-            <g id="timeline-item-3">
+            <g id="shape-star">
               <rect
                 width={208}
                 height={30}
@@ -216,7 +232,7 @@ export default function TimelineVisualizer() {
                 </text>
               </g>
             </g>
-            <g id="timeline-item-2">
+            <g id="shape-ellipse">
               <rect
                 width={208}
                 height={30}
@@ -248,7 +264,7 @@ export default function TimelineVisualizer() {
                 </text>
               </g>
             </g>
-            <g id="timeline-item-1">
+            <g id="shape-box">
               <rect
                 width={208}
                 height={30}
