@@ -139,7 +139,7 @@ export default function TimelineVisualizer() {
         gsap.to(animationTl.current, { timeScale: 1, duration: 0.3 });
       }
 
-      animationTl.current.timeScale(1);
+      animationTl.current.play();
     });
 
     context();
