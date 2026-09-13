@@ -61,7 +61,7 @@ export default function WrapText() {
     >
       <h1 className="text-cyan-200 text-7xl text-center">
         This is registerPluginDemo , gsap.utils.wrap() and <br />{" "}
-        gsap.registerEffect
+        gsap.registerEffect()
       </h1>
 
       <p className="text-cyan-100 text-4xl">Have a great day!</p>

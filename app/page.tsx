@@ -1,5 +1,6 @@
 "use client";
 
+import FunctionYDemo from "./components/FunctionYDemo";
 import MouseDemo from "./components/MouseDemo";
 import RotationDimensionText from "./components/RotationDimensionText";
 import RubberText from "./components/RubberText";
@@ -13,6 +14,7 @@ export default function Home() {
     <div>
       <SchoolTravel />
       <TimelineVisualizer />
+      <FunctionYDemo />
       <WrapText />
       <RotationDimensionText />
       <MouseDemo />
