@@ -12,25 +12,33 @@ export default function FunctionYDemo() {
       const itemBoxes = container.current?.querySelectorAll(".item-box");
       if (!itemBoxes) return;
 
-      gsap.to(itemBoxes, {
-        y: (index: number, target: HTMLElement, targets: HTMLElement[]) => {
-          if (target.textContent === "6" || target.textContent === "4") {
-            return 0;
-          }
+      function pickColor(
+        index: number,
+        target: HTMLElement,
+        targets: HTMLElement[],
+      ) {
+        if (target.textContent === "4") {
+          return "pink";
+        }
 
-          return index * 50;
-        },
-        backgroundColor: function (
-          index: number,
-          target: HTMLElement,
-          targets: HTMLElement[],
-        ) {
-          if (target.textContent === "4") {
-            return "pink";
-          }
+        return "none";
+      }
 
-          return "none";
-        },
+      const pickAxisY = (
+        index: number,
+        target: HTMLElement,
+        targets: HTMLElement[],
+      ) => {
+        if (target.textContent === "6" || target.textContent === "4") {
+          return 0;
+        }
+
+        return index * 50;
+      };
+
+      gsap.timeline({ repeat: -1, repeatDelay: 1, yoyo: true }).to(itemBoxes, {
+        y: pickAxisY,
+        backgroundColor: pickColor,
       });
     },
     { scope: container },

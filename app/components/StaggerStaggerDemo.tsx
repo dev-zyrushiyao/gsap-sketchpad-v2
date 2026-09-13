@@ -33,19 +33,36 @@ export default function StaggerStaggerDemo() {
       //from and to doesn't have a opacity 1 because when its created its default by opacity 1
       const textSlideShow =
         container.current?.querySelectorAll(".text-slideshow");
+
       if (!textSlideShow) return;
-      const staggerInterval = 1;
+
+      const pause = 0.5;
+      const duration = 0.5;
+      const stagger = duration + pause;
+      const numberOfTargets = textSlideShow.length;
+      const repeatDelay = stagger * (numberOfTargets - 1) + pause;
+
       const tl = gsap
-        .timeline({
-          repeat: -1,
-          repeatDelay: 0.5,
-          ease: "power1.inOut",
+        .timeline({})
+        .from(textSlideShow, {
+          duration: duration,
+          y: 50,
+          opacity: 0,
+          stagger: {
+            each: stagger,
+            repeat: -1,
+            repeatDelay: repeatDelay,
+          },
         })
-        .from(textSlideShow, { y: 50, opacity: 0, stagger: staggerInterval })
         .to(
           textSlideShow,
-          { y: -50, opacity: 0, stagger: staggerInterval },
-          staggerInterval,
+          {
+            duration: duration,
+            y: -50,
+            opacity: 0,
+            stagger: { each: stagger, repeat: -1, repeatDelay: repeatDelay },
+          },
+          stagger,
         );
     },
     { scope: container },
