@@ -28,7 +28,6 @@ export default function MouseDemo() {
       if (!containerRect) return;
       const containerWidth = containerRect.width;
       const containerCenter = containerWidth / 2;
-      console.log("containerRect.left", containerRect.left);
 
       //scroll computation
       const scrollAmount = boxWrapperWidth - containerWidth;
