@@ -14,6 +14,7 @@ import TextDistribute from "./components/TextDistribute";
 import TimelineVisualizer from "./components/TimelineVisualizer";
 import TweenFromDemo from "./components/TweenFromDemo";
 import WrapText from "./components/WrapText";
+import TitleEffectsGen from "./components/TitleEffectsGen";
 
 export default function Home() {
   return (
@@ -31,6 +32,7 @@ export default function Home() {
       <SplitCharStagger />
       <LinearNavigationTimeline />
       <TweenFromDemo />
+      <TitleEffectsGen />
     </div>
   );
 }
