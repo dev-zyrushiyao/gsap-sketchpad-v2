@@ -17,6 +17,8 @@ import WrapText from "./components/WrapText";
 import TitleEffectsGen from "./components/TitleEffectsGen";
 import InYourFaceText from "./components/InYourFaceText";
 import WiggleText from "./components/WiggleText";
+import RoughAndCustomDemo from "./components/RoughAndCustomDemo";
+import BuldgeText from "./components/BuldgeText";
 
 export default function Home() {
   return (
@@ -37,6 +39,8 @@ export default function Home() {
       <TitleEffectsGen />
       <InYourFaceText />
       <WiggleText />
+      <RoughAndCustomDemo />
+      <BuldgeText />
     </div>
   );
 }

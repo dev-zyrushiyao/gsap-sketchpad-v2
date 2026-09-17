@@ -11,7 +11,7 @@ gsap.registerEffect({
   extendTimeline: true,
   defaults: {
     y: 100,
-    ease: "elastic(0.7, 0.35)",
+    ease: "elastic(1, 0.35)",
     stagger: 0.03,
     opacity: 0,
     durationEase: 1,
@@ -64,11 +64,11 @@ export default function WiggleText() {
       const setOpacity = gsap.quickSetter(container.current, "opacity");
       setOpacity(1);
 
-      const tl = gsap.timeline();
+      const tl = gsap.timeline({ repeat: -1, repeatDelay: 1 });
       tl.wiggleText(splitHeader.chars).wiggleText(
         splitPara.words,
         {
-          durationEase: 1,
+          durationEase: 2,
         },
         "-=0.90",
       );
@@ -89,6 +89,9 @@ export default function WiggleText() {
         Animation is all about creativity!
       </h3>
       <p className="text-2xl">Lets learn GSAP Animation together!</p>
+      <p className="text-2xl">
+        Wiggle effect is brought to you by elastic ease
+      </p>
     </div>
   );
 }
