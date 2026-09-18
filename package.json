@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d out -b gh-pages --dotfiles"
+    "deploy": "gh-pages -d out -b gh-pages --dotfiles --nojekyll"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
